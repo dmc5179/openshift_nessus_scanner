@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nessus
+  namespace: nessus
+  labels:
+    app: nessus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nessus
+subjects:
+- kind: ServiceAccount
+  name: nessus
+  namespace: nessus
+userNames:
+- system:serviceaccount:nessus:nessus
