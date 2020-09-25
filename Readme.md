@@ -22,6 +22,43 @@ Each image is tagged with the major, minor, and patch releases.  The most curren
 
 # Usage
 
+## Deploying on OpenShift
+
+To deploy on openshift run the following commands
+
+- Create the nessus namespace
+```
+oc create -f openshift/0000_namespace.yaml
+```
+
+- Create the nessus service account
+```
+oc create -f openshift/0100_service_account.yaml
+```
+
+- Create the nessus role
+```
+oc create -f openshift/0200_role.yaml
+```
+
+- Create the nessus role binding
+```
+oc create -f openshift/0300_rolebinding.yaml
+```
+
+- Create the nessus security context
+```
+oc create -f openshift/0810_scc.openshift.yaml
+```
+
+- Create the nessus daemonset
+```
+oc create -f openshift/0900_daemonset.yaml
+```
+
+
+## Running in a single container
+
 ```
 docker run -dt \
     -e LINKING_KEY={LINKING_KEY}\
