@@ -1,0 +1,32 @@
+FROM registry.redhat.io/ubi8/ubi
+
+ENV LINKING_KEY  ""
+ENV SCANNER_NAME ""
+ENV MANAGER_HOST ""
+ENV MANAGER_PORT ""
+ENV PROXY_HOST   ""
+ENV PROXY_PORT   ""
+ENV PROXY_USER   ""
+ENV PROXY_PASS   ""
+ENV PROXY_AGENT  ""
+ENV LICENSE      ""
+ENV ADMIN_USER   "admin"
+ENV ADMIN_PASS   ""
+
+COPY agent_startup.sh nessus_adduser.exp /usr/bin/
+COPY NessusAgent-8.1.0-es8.x86_64.rpm Agent_plugins_expires_2020-09-29.tgz /tmp/
+
+RUN dnf -y update \
+ && rpm -ihv --noscripts /tmp/NessusAgent-8.1.0-es8.x86_64.rpm \
+ && dnf clean all \
+ && rm -rf /var/cache/dnf \
+ && /opt/nessus_agent/sbin/nessuscli install /opt/nessus_agent/var/nessus/plugins-core.tar.gz \
+ && /opt/nessus_agent/sbin/nessuscli agent update --file=/tmp/Agent_plugins_expires_2020-09-29.tgz \
+ && rm -f /tmp/NessusAgent-8.1.0-es8.x86_64.rpm \
+ && rm -f /tmp/Agent_plugins_expires_2020-09-29.tgz \
+ && chmod +x /usr/bin/agent_startup.sh \
+ && echo -e "export PATH=$PATH:/opt/nessus/bin:/opt/nessus/sbin" >> /etc/bashrc
+
+EXPOSE 8834
+EXPOSE 443
+CMD ["/usr/bin/agent_startup.sh"]

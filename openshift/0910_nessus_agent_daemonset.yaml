@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: nessus
+  name: nessus
+  namespace: nessus
+  annotations:
+    openshift.io/scc: nessus
+spec:
+  selector:
+    matchLabels:
+      app: nessus
+  template:
+    metadata:
+      # Mark this pod as a critical add-on; when enabled, the critical add-on scheduler
+      # reserves resources for critical add-on pods so that they can be rescheduled after
+      # a failure.  This annotation works in tandem with the toleration below.
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+      labels:
+        app: nessus
+    spec:
+#      tolerations:
+#      # Allow this pod to be rescheduled while the node is in "critical add-ons only" mode.
+#      # This, along with the annotation above marks this pod as a critical add-on.
+#      - key: CriticalAddonsOnly
+#        operator: Exists
+      serviceAccount: nessus
+      serviceAccountName: nessus
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      containers:
+      - image: quay.io/danclark/nessus_agent:latest
+        name: nessus
+        env:
+        - name: LINKING_KEY
+          value: 7e69d1499a794c8bc9edd56c87168ea060027e58025978f4d58d93011e164689
+        - name: MANAGER_HOST
+          value: cloud.tenable.com
+        - name: MANAGER_PORT
+          value: '443'
+        port: 443
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
